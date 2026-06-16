@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  localstack:
+    image: localstack/localstack:3.0.2
+    container_name: bedrock-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,dynamodb,sqs,lamdba
+      - DEBUG=1
+      - AWS_DEFAULT_REGION=eu-west-2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+       
+  backend:
+    build:
+      context: ./backend_python
+    container_name: python-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend_python:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build:
+      context: ./frontend_react
+    container_name: react-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend_react:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend

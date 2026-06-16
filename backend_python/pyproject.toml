@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "backend_python"
+version = "0.1.0"
+description = "AI Chat Project"
+authors = ["abc <abc1819@abc.com>"]
+
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+openai = "^2.36.0"
+python-dotenv = "^1.2.2"
+uvicorn = "^0.46.0"
+fastapi = "^0.136.1"
+python-multipart = "^0.0.28"
+pydantic = "^2.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "awscli-local (>=0.22.2,<0.23.0)"
+]
