@@ -4,3 +4,7 @@ fastapi[standard]
 uvicorn[standard]
 python-multipart
 pydantic>=2.0
+pytest
+email-validator
+boto3
+pypdfium2

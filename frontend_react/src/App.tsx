@@ -1,122 +1,152 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import { api, type Submission } from "./api";
+import Contact from "./pages/Contact";
+import Payment from "./pages/Payment";
+import Review from "./pages/Review";
+import UploadPDF from "./pages/UploadPDF";
+import FormType from "./pages/FormType";
 
-function App() {
-  const [count, setCount] = useState(0)
+export type WizardData = {
+  displayName: string;
+  email: string;
+  phone: string;
+  paymentReference: string;
+  formType: string;
+  file: File | null;
+};
+
+const initialData: WizardData = {
+  displayName: "",
+  email: "",
+  phone: "",
+  paymentReference: "",
+  formType: "",
+  file: null,
+};
+
+export default function App() {
+  const [step, setStep] = useState(1);
+  const [data, setData] = useState<WizardData>(initialData);
+  const [submission, setSubmission] = useState<Submission | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function run(action: () => Promise<Submission>, nextStep?: number) {
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const updated = await action();
+      setSubmission(updated);
+      if (nextStep) {
+        setStep(nextStep);
+      }
+      return true;
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Something went wrong");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const createOrUpdatePresenter = () =>
+    run(
+      () =>
+        submission
+          ? api.updatePresenter(submission.id, data.displayName, data.email, data.phone)
+          : api.createSubmission(data.displayName, data.email, data.phone),
+      2,
+    );
+
+  const savePayment = () =>
+    run(() => api.updatePayment(requireSubmissionId(submission), data.paymentReference), 3);
+
+  const saveFormType = () => run(() => api.updateFormType(requireSubmissionId(submission), data.formType), 4);
+
+  const uploadFile = () => {
+    const selectedFile = data.file;
+    if (!selectedFile) {
+      setError("Choose a PDF before continuing.");
+      return;
+    }
+    void run(() => api.uploadFile(requireSubmissionId(submission), selectedFile), 5);
+  };
+
+  const submit = async () => {
+    const succeeded = await run(() => api.submit(requireSubmissionId(submission)));
+    if (succeeded) {
+      setMessage("Submission sent. The PDF has been queued for TIFF conversion.");
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <main className="app-shell">
+      <header className="app-header">
+        <p className="eyebrow">AWS Bedrock submission MVP</p>
+        <h1>Submission journey</h1>
+        <p>Complete each step. Your progress is saved to the backend as you go.</p>
+      </header>
 
-      <div className="ticks"></div>
+      <nav className="stepper" aria-label="Submission progress">
+        {["Contact", "Payment", "Form", "PDF", "Review"].map((label, index) => (
+          <span key={label} className={step === index + 1 ? "active" : ""}>
+            {index + 1}. {label}
+          </span>
+        ))}
+      </nav>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {error && <p className="alert error">{error}</p>}
+      {message && <p className="alert success">{message}</p>}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {step === 1 && (
+        <Contact data={data} setData={setData} loading={loading} next={createOrUpdatePresenter} />
+      )}
+      {step === 2 && (
+        <Payment
+          data={data}
+          setData={setData}
+          loading={loading}
+          previous={() => setStep(1)}
+          next={savePayment}
+        />
+      )}
+      {step === 3 && (
+        <FormType
+          data={data}
+          setData={setData}
+          loading={loading}
+          previous={() => setStep(2)}
+          next={saveFormType}
+        />
+      )}
+      {step === 4 && (
+        <UploadPDF
+          data={data}
+          setData={setData}
+          loading={loading}
+          previous={() => setStep(3)}
+          next={uploadFile}
+        />
+      )}
+      {step === 5 && (
+        <Review
+          data={data}
+          submission={submission}
+          loading={loading}
+          previous={() => setStep(4)}
+          submit={submit}
+        />
+      )}
+    </main>
+  );
 }
 
-export default App
+function requireSubmissionId(submission: Submission | null) {
+  if (!submission) {
+    throw new Error("Start the submission before continuing.");
+  }
+  return submission.id;
+}

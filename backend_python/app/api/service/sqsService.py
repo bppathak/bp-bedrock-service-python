@@ -11,7 +11,7 @@ def is_empty(value):
 
 def sendMessage(message: str):
     
-    print("SQS service to: {message}")
+    print(f"SQS service to: {message}")
 
     print(USE_SQS)
     if not USE_SQS:

@@ -1,7 +1,7 @@
 # Build stage
 FROM node:20 AS builder
 
-WORKDIR /frontend_react
+WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
@@ -13,7 +13,7 @@ RUN npm run build
 # Production stage
 #FROM node:20
 
-#WORKDIR /frontend_react
+#WORKDIR /app
 
 #COPY package*.json ./
 #RUN npm install --omit=dev
@@ -22,6 +22,8 @@ RUN npm run build
 #COPY --from=builder /frontend_react/public ./public
 #COPY --from=builder /frontend_react/next.config.* ./
 
-EXPOSE 3000
+EXPOSE 5173
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# CMD ["npm", "start"]
