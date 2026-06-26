@@ -3,9 +3,7 @@ version: "3.9"
 services:
   localstack:
     image: localstack/localstack:3.0.2
-    networks:
-      - bp-app-network
-    container_name: localstack
+    container_name: bedrock-localstack
     ports:
       - "4566:4566"
     environment:
@@ -13,34 +11,50 @@ services:
       - DEBUG=1
       - AWS_DEFAULT_REGION=eu-west-2
       - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test      
+      - AWS_SECRET_ACCESS_KEY=test
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
+       
   backend:
     build:
       context: ./backend_python
-      dockerfile: Dockerfile
-    image: backend-python
-    networks:
-      - bp-app-network
     container_name: python-backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend_python:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - AWS_DEFAULT_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - S3_BUCKET=bp-submission-files
+      - SQS_QUEUE_NAME=bp-submission-conversion-queue
+      - SQS_QUEUE_URL=http://localstack:4566/000000000000/bp-submission-conversion-queue
+      - USE_AWS_SERVICES=true
+      - DYNAMODB_SUBMISSIONS_TABLE=bp-submissions
+      - DYNAMODB_USERS_TABLE=bp-users
+      - USE_DYNAMODB=true
+      - JWT_SECRET=local-development-secret
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+      - LOCAL_DATA_DIR=/tmp/bp-bedrock-service
+      - LOCAL_FILE_DIR=/tmp/bp-bedrock-service/files
+    depends_on:
+      - localstack
+
   frontend:
     build:
       context: ./frontend_react
-      dockerfile: Dockerfile
-    image: frontend-react
-    networks:
-      - bp-app-network
     container_name: react-frontend
     ports:
       - "5173:5173"
+    volumes:
+      - ./frontend_react:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+    environment:
       - VITE_API_BASE_URL=http://localhost:8000
     depends_on:
       - backend
-
-networks:
-  bp-app-network:
-    driver: bridge
