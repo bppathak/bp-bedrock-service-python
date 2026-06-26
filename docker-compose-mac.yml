@@ -3,9 +3,7 @@ version: "3.9"
 services:
   localstack:
     image: localstack/localstack:3.0.2
-    networks:
-      - bp-app-network
-    container_name: localstack
+    container_name: bedrock-localstack
     ports:
       - "4566:4566"
     environment:
@@ -20,10 +18,6 @@ services:
   backend:
     build:
       context: ./backend_python
-      dockerfile: Dockerfile
-    image: backend-python
-    networks:
-      - bp-app-network
     container_name: python-backend
     ports:
       - "8000:8000"
@@ -52,10 +46,6 @@ services:
   frontend:
     build:
       context: ./frontend_react
-      dockerfile: Dockerfile
-    image: frontend-react
-    networks:
-      - bp-app-network
     container_name: react-frontend
     ports:
       - "5173:5173"
@@ -68,7 +58,3 @@ services:
       - VITE_API_BASE_URL=http://localhost:8000
     depends_on:
       - backend
-
-networks:
-  bp-app-network:
-    driver: bridge
