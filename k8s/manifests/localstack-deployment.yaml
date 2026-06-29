@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: localstack
+  namespace: bp-bedrock
+  labels:
+    app: localstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: localstack
+  template:
+    metadata:
+      labels:
+        app: localstack
+    spec:
+      containers:
+        - name: localstack
+          image: localstack/localstack:3.0.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4566
+              name: edge
+          env:
+            - name: SERVICES
+              value: "s3,dynamodb,sqs,lambda"
+            - name: DEBUG
+              value: "1"
+            - name: AWS_DEFAULT_REGION
+              value: "eu-west-2"
+            - name: AWS_ACCESS_KEY_ID
+              value: "test"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "test"
+          volumeMounts:
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+              # For some envs localstack needs docker socket; consider removing in managed clusters
+      volumes:
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
