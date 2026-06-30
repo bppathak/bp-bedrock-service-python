@@ -11,8 +11,8 @@ ENV HTTP_PROXY=http://10.210.195.1:8080
 ENV HTTPS_PROXY=http://10.210.195.1:8080
 
 # RUN dnf intall -y python3 python3-pip
-# RUN python3 -m pip install --upgrade pip
-# RUN pip3 install poetry
+RUN python3 -m pip install --upgrade pip
+RUN pip3 install poetry
 RUN python -m pip install --upgrade pip
 RUN pip install poetry==2.2.1
 RUN pip install -r requirements.txt

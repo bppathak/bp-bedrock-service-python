@@ -5,6 +5,8 @@ WORKDIR /frontend_react
 
 COPY package*.json ./
 RUN npm install
+
+COPY . .
 # Production stage
 #FROM node:20
 
@@ -15,4 +17,5 @@ RUN npm install
 
 EXPOSE 5173
 
-CMD ["npm", "start"]
+# CMD ["npm", "start"]
+CMD ["npm", "run", "dev", "--", "--host"]
