@@ -191,3 +191,5 @@ If you run the frontend as a static build served by nginx (recommended for produ
 If running in cloud, the LoadBalancer service will provision an external IP; for bare-metal clusters, change Service type to NodePort and access via node:nodePort, or put a cloud load balancer in front.
 
 
+## Add TLS (self-signed certs) to nginx
+
