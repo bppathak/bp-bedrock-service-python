@@ -1,14 +1,19 @@
 import json
 import os
+import logging
 from pathlib import Path
 from typing import Any
+from datetime import datetime
 
 from app.models.submission import Submission, UserRecord
+from botocore.exceptions import ClientError
 
 try:
     import boto3
 except ImportError:  # pragma: no cover - optional runtime dependency
     boto3 = None
+
+logger = logging.getLogger(__name__)
 
 
 class Repository:
@@ -101,9 +106,124 @@ class DynamoDbRepository(Repository):
         item = response.get("Item")
         return UserRecord.model_validate(item) if item else None
 
+    def _serialize_item(self, item: dict[str, Any]) -> dict[str, Any]:
+        """Convert Pydantic model to DynamoDB-compatible format.
+        
+        Handles serialization of datetime objects and nested structures
+        to ensure compatibility with DynamoDB put_item operations.
+        """
+        serialized = {}
+        for key, value in item.items():
+            if isinstance(value, datetime):
+                # Convert datetime to ISO format string for DynamoDB
+                serialized[key] = value.isoformat()
+            elif isinstance(value, dict):
+                # Recursively serialize nested dictionaries
+                serialized[key] = self._serialize_item(value)
+            elif isinstance(value, list):
+                # Handle lists with datetime or nested objects
+                serialized[key] = [
+                    self._serialize_item(v) if isinstance(v, dict) 
+                    else v.isoformat() if isinstance(v, datetime) 
+                    else v
+                    for v in value
+                ]
+            elif value is None:
+                # Skip None values as DynamoDB doesn't store them
+                continue
+            else:
+                serialized[key] = value
+        return serialized
+
     def upsert_submission(self, submission: Submission) -> Submission:
-        self.submissions.put_item(Item=submission.model_dump(mode="json"))
-        return submission
+        """Upsert submission with proper serialization and error handling for DynamoDB.
+        
+        This method handles:
+        - Conversion of Pydantic datetime objects to ISO format strings
+        - Nested object serialization (Presenter, SubmissionForm)
+        - DynamoDB-specific type constraints
+        - Comprehensive error logging for Red Hat Linux environments
+        
+        Args:
+            submission: Submission model instance to upsert
+            
+        Returns:
+            Submission: The upserted submission object
+            
+        Raises:
+            ClientError: If DynamoDB operation fails
+            Exception: For unexpected errors during serialization
+        """
+        try:
+            # Convert Pydantic model to dictionary
+            item = submission.model_dump(mode="json")
+            
+            # Serialize all datetime objects and nested structures for DynamoDB compatibility
+            item = self._serialize_item(item)
+            
+            # Add metadata for audit trails
+            item["_updated_at"] = datetime.utcnow().isoformat()
+            item["_environment"] = os.getenv("ENVIRONMENT", "production")
+            
+            logger.debug(
+                f"Preparing to upsert submission: {submission.id}",
+                extra={"submission_id": submission.id}
+            )
+            
+            # Put item into DynamoDB table
+            self.submissions.put_item(Item=item)
+            
+            logger.info(
+                "Submission upserted successfully",
+                extra={
+                    "submission_id": submission.id,
+                    "presenter_email": submission.presenter.email,
+                    "status": submission.status,
+                    "form_type": submission.form.form_type
+                }
+            )
+            return submission
+            
+        except ClientError as e:
+            # Handle AWS/DynamoDB-specific errors
+            error_code = e.response.get("Error", {}).get("Code", "UNKNOWN")
+            error_message = e.response.get("Error", {}).get("Message", "No message provided")
+            
+            logger.error(
+                f"DynamoDB submission upsert failed: {error_code}",
+                extra={
+                    "submission_id": submission.id,
+                    "error_code": error_code,
+                    "error_message": error_message,
+                    "exception_type": type(e).__name__
+                },
+                exc_info=True
+            )
+            raise
+        except TypeError as e:
+            # Handle serialization type errors
+            logger.error(
+                "Type error during submission serialization",
+                extra={
+                    "submission_id": submission.id,
+                    "error_message": str(e),
+                    "exception_type": "TypeError"
+                },
+                exc_info=True
+            )
+            raise ValueError(f"Failed to serialize submission: {str(e)}") from e
+        except Exception as e:
+            # Catch any unexpected errors
+            logger.error(
+                "Unexpected error during submission upsert",
+                extra={
+                    "submission_id": submission.id,
+                    "exception_type": type(e).__name__,
+                    "error_message": str(e)
+                },
+                exc_info=True
+            )
+            raise
 
     def get_submission(self, submission_id: str) -> Submission | None:
         response = self.submissions.get_item(Key={"id": submission_id})
