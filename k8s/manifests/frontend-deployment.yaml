@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: bp-bedrock
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          # Replace with your registry image (built from frontend_react/Dockerfile)
+          image: bppathak/bp-bedrock-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5173
+              name: http
+          env:
+            # Frontend will call relative path /api so that ingress can proxy backend requests
+            - name: VITE_API_BASE_URL
+              value: "/api"
