@@ -142,7 +142,7 @@ What is created (each block below is a separate YAML file):
     localstack-service.yaml — ClusterIP Service for localstack
     ingress.yaml — Ingress resource routing /api to backend and / to frontend
 
-Note: image names are placeholders — replace with your built image names (e.g., registry/bp-backend:tag). The frontend is configured to call the API at /api (so the browser-hosted frontend can call same-origin /api). If you prefer an nginx reverse-proxy Deployment instead of using a cluster Ingress resource, I can generate that as well.
+Note: image names are placeholders — replace with your built image names (e.g., registry/bp-backend:tag). The frontend is configured to call the API at /api (so the browser-hosted frontend can call same-origin /api). If you prefer an nginx reverse-proxy Deployment instead of using a cluster Ingress resource, follow the next step.
 
 
 ## Next steps / notes:
@@ -163,11 +163,11 @@ Apply manifests:
     Note - with nginx-proxy, as below, you do not need the Ingress for external routing.
 
 For production, consider:
-Using PVCs instead of emptyDir for persistent storage.
-Running localstack only for dev environments (omit in prod).
-Adding liveness/readiness probes.
-Securing secrets via a secret manager and imagePullSecrets if using private registries.
-TLS for the Ingress (use cert-manager or cloud certificates).
+    Using PVCs instead of emptyDir for persistent storage.
+    Running localstack only for dev environments (omit in prod).
+    Adding liveness/readiness probes.
+    Securing secrets via a secret manager and imagePullSecrets if using private registries.
+    TLS for the Ingress (use cert-manager or cloud certificates).
 
 ## NGIX reverse proxy deployment manifests files
 

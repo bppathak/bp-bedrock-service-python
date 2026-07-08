@@ -11,7 +11,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: example.com  # replace with your domain or remove to use default
+    - host:   # replace with your domain or remove to use default
       http:
         paths:
           - path: /api
