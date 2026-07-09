@@ -27,6 +27,10 @@ IMAGE_MISSING=false
 # echo "Starting Docker..."
 # ./start-bedrock-docker.sh
 
+docker build -t python-backend:latest ./backend_python
+docker build -t react-frontend:latest ./frontend_react
+docker pull localstack/localstack:3.0.2
+
 echo "Checking Docker images..."
 for IMAGE in "$BACKEND_IMAGE" "$FRONTEND_IMAGE" "$LOCALSTACK_IMAGE"; do
     if docker image inspect "$IMAGE" >/dev/null 2>&1; then
@@ -43,12 +47,6 @@ if [ "$IMAGE_MISSING" = true ]; then
 else
     echo "All images already exist. Skipping build."
 fi
-
-#echo "Starting containers..."
-#docker compose up -d
-
-#echo "Waiting for Docker containers..."
-#sleep 30
 
 echo "Checking Kubernetes connectivity..."
 docker context show
