@@ -24,9 +24,6 @@ IMAGE_MISSING=false
 
 # ./cleanup-environment.sh $NAMESPACE
 
-docker context show
-kubectl config set-context --current --namespace=$NAMESPACE
-
 # echo "Starting Docker..."
 # ./start-bedrock-docker.sh
 
@@ -47,13 +44,16 @@ else
     echo "All images already exist. Skipping build."
 fi
 
-echo "Starting containers..."
-docker compose up -d
+#echo "Starting containers..."
+#docker compose up -d
 
-echo "Waiting for Docker containers..."
-sleep 30
+#echo "Waiting for Docker containers..."
+#sleep 30
 
 echo "Checking Kubernetes connectivity..."
+docker context show
+kubectl config set-context --current --namespace=$NAMESPACE
+
 if ! kubectl cluster-info >/dev/null 2>&1; then
     echo "ERROR: Kubernetes cluster is not available."
     echo "Start Docker Desktop and wait until Kubernetes is Running."
@@ -80,14 +80,18 @@ done
 
 echo "Applying Kubernetes manifests..."
 kubectl apply -f ./k8s/manifests
+echo "Waiting for manifests to be applied..."
+sleep 30
 
-echo "Waiting for pods..."
+echo "update dynamodb, s3 and sqs endpoints in localstack"
+kubectl apply -f ./k8s/localstack-init.yaml
+
 kubectl get pods -n $NAMESPACE
 
 echo "Importing docker images to kubernetes"
 ./import-dockerImage-2-k2s.sh
 
-echo "Applying bootstrap localstack..."
-./bootstrap-localstack.sh
+#echo "Applying bootstrap localstack..."
+#./bootstrap-localstack.sh
 
 echo "Done."

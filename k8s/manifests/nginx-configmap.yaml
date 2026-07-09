@@ -21,6 +21,18 @@ data:
         add_header Content-Type text/plain;
       }
 
+      # FastAPI docs
+      location /docs {
+        proxy_pass http://backend:8000/docs;
+        proxy_set_header Host $host;
+      }
+
+      # OpenAPI JSON
+      location /openapi.json {
+        proxy_pass http://backend:8000/openapi.json;
+        proxy_set_header Host $host;
+      }
+
       # Proxy backend API requests
       location /api/ {
         proxy_pass http://backend:8000/;
