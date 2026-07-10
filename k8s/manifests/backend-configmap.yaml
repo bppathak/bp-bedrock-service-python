@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: bp-bedrock
+data:
+  AWS_DEFAULT_REGION: "eu-west-2"
+  AWS_ENDPOINT_URL: "http://localstack:4566"
+  S3_BUCKET: "bp-submission-files"
+  SQS_QUEUE_NAME: "bp-submission-conversion-queue"
+  SQS_QUEUE_URL: "http://localstack:4566/000000000000/bp-submission-conversion-queue"
+  USE_AWS_SERVICES: "true"
+  DYNAMODB_SUBMISSIONS_TABLE: "bp-submissions"
+  DYNAMODB_USERS_TABLE: "bp-users"
+  USE_DYNAMODB: "true"
+  CORS_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+  LOCAL_DATA_DIR: "/tmp/bp-bedrock-service"
+  LOCAL_FILE_DIR: "/tmp/bp-bedrock-service/files"
+  PYTHONUNBUFFERED: "1"

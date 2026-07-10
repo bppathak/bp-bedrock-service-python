@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sqs-init
+  namespace: bp-bedrock
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: init
+        image: localstack/localstack:3.0.2
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          value: test
+        - name: AWS_SECRET_ACCESS_KEY
+          value: test
+        command:
+        - sh
+        - -c
+        - |
+          echo "Creating SQS..."  
+          aws --endpoint-url=http://localstack:4566 \
+            --region eu-west-2 \
+            sqs create-queue \
+            --queue-name bp-submission-conversion-queue || true
