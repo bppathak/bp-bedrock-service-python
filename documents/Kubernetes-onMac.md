@@ -1,7 +1,5 @@
 [TOC]
 
-
-
 Introduction
 ​	Cluster : Created by Kubernetes
 

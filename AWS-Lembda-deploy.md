@@ -1,12 +1,3 @@
-https://github.com/sarahholderness
-
-
-Can you create a list of tasks to implement the technical requirements from @Requirements.md
-
-http://127.0.0.1:5173/
-
-http://127.0.0.1:8000/docs
-
 ## Deploy Lambda into localstack
 
 1. Create Your Lambda Function using JAVA

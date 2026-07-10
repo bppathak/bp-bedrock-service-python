@@ -1,3 +1,13 @@
+## USeful Scripts - Kubernetes deployment
+
+    - Make sure kubernetes are running. This is tested on docker with kubernetes enabled. 
+    Remember, any changes in application images and/or manifestation needs kubernetes re-startedk to reflece the changes.
+
+    ...../k8s/scripts/cleanup-environment.sh.   : To clean kubernets namespace bp-bedrock
+
+     ...../k8s/scripts/start-k8s.sh.            : To build and deploy namespace with all application frontend, backend and localstack
+
+
 ## Useful commands
 
     View pods:
@@ -25,7 +35,7 @@ Docker Compose and Kubernetes serve different purposes:
 - Docker Compose orchestrates containers on a single machine.
 - Kubernetes orchestrates containers across one or more machines, with features like scaling, rolling updates, and self-healing.
 
-As we already have a docker-compose.yml for your FastAPI and React application, the typical migration is:
+As we already have a docker-compose.yml for FastAPI and React application, the typical migration is:
 
 - Build your Docker images.
 - Push them to a registry (or load them into Kind).
