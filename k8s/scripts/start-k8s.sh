@@ -27,9 +27,9 @@ IMAGE_MISSING=false
 # echo "Starting Docker..."
 # ./start-bedrock-docker.sh
 
-docker build -t python-backend:latest ./backend_python
-docker build -t react-frontend:latest ./frontend_react
-docker pull localstack/localstack:3.0.2
+docker build -t python-backend:latest ../../backend_python
+docker build -t react-frontend:latest ../../frontend_react
+# docker pull localstack/localstack:3.0.2
 
 echo "Checking Docker images..."
 for IMAGE in "$BACKEND_IMAGE" "$FRONTEND_IMAGE" "$LOCALSTACK_IMAGE"; do
@@ -67,7 +67,7 @@ done
 
 
 echo "Applying namespace..."
-kubectl apply -f k8s/manifests/namespace.yaml
+kubectl apply -f ../../k8s/manifests/namespace.yaml
 
 echo "Waiting for namespace $NAMESPACE..."
 until kubectl get namespace $NAMESPACE >/dev/null 2>&1
@@ -77,12 +77,12 @@ do
 done
 
 echo "Applying Kubernetes manifests..."
-kubectl apply -f ./k8s/manifests
+kubectl apply -f ../../k8s/manifests
 echo "Waiting for manifests to be applied..."
 sleep 30
 
 echo "update dynamodb, s3 and sqs endpoints in localstack"
-kubectl apply -f ./k8s/localstack-init.yaml
+kubectl apply -f ../../k8s/localstack-init.yaml
 
 kubectl get pods -n $NAMESPACE
 
