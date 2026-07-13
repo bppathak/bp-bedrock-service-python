@@ -82,7 +82,12 @@ class DynamoDbRepository(Repository):
     def __init__(self) -> None:
         if boto3 is None:
             raise RuntimeError("boto3 is required when USE_DYNAMODB=true")
-        kwargs = {"region_name": os.getenv("AWS_DEFAULT_REGION", "eu-west-2")}
+        kwargs = {
+            "endpoint_url": os.getenv("AWS_ENDPOINT_URL"),
+            "region_name": os.getenv("AWS_DEFAULT_REGION", "eu-west-2"),
+            "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID"),
+            "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
+        }
         endpoint_url = os.getenv("AWS_ENDPOINT_URL")
         if endpoint_url:
             kwargs["endpoint_url"] = endpoint_url

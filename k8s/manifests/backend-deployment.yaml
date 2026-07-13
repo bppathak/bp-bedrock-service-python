@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: bp-bedrock
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          # Replace with your registry image (built from backend_python/Dockerfile)
+          image: python-backend:latest 
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secret
+          env:
+            - name: VITE_API_BASE_URL
+              value: "/api"
+            - name: AWS_ACCESS_KEY_ID
+              value: test
+            - name: AWS_SECRET_ACCESS_KEY
+              value: test
+            - name: AWS_REGION
+              value: eu-west-2
+            - name: AWS_ENDPOINT_URL
+              value: http://localstack:4566
+          volumeMounts:
+            - name: local-data
+              mountPath: /tmp/bp-bedrock-service
+      volumes:
+        - name: local-data
+          emptyDir: {}

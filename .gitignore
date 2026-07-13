@@ -248,3 +248,38 @@ dist-ssr
 logs/
 /var/log/bp-bedrock-service/
 *.log
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Node.js
+node_modules/
+dist/
+build/
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.*
+
+# Docker
+*.tar
+
+# Kubernetes
+*.swp

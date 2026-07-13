@@ -17,9 +17,14 @@ logging.basicConfig(
 )
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="BP Bedrock Submission Service")
+    app = FastAPI(
+        title="BP Bedrock Submission Service", 
+        root_path="/api",
+        docs_url="/docs",
+        openapi_url="/openapi.json"
+    )
 
-    cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+    cors_origins = os.getenv("CORS_ORIGINS", "*")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[origin.strip() for origin in cors_origins.split(",") if origin.strip()],

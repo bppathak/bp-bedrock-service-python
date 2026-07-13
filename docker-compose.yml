@@ -1,11 +1,7 @@
-version: "3.9"
-
 services:
   localstack:
     image: localstack/localstack:3.0.2
-    networks:
-      - bp-app-network
-    container_name: localstack
+    container_name: bedrock-localstack
     ports:
       - "4566:4566"
     environment:
@@ -21,10 +17,8 @@ services:
     build:
       context: ./backend_python
       dockerfile: Dockerfile
-    image: backend-python
-    networks:
-      - bp-app-network
-    container_name: python-backend
+    image: python-backend
+    container_name: bedrock-python-backend
     ports:
       - "8000:8000"
     volumes:
@@ -54,10 +48,8 @@ services:
     build:
       context: ./frontend_react
       dockerfile: Dockerfile
-    image: frontend-react
-    networks:
-      - bp-app-network
-    container_name: react-frontend
+    image: react-frontend  
+    container_name: bedrock-react-frontend
     ports:
       - "5173:5173"
     volumes:
