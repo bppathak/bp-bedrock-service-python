@@ -44,12 +44,12 @@ fi
 echo "Running Docker cleanup..."
 docker system prune -a --volumes -f
 
-# IMAGES=$(docker images -aq)
-# if [ -n "$IMAGES" ]; then
-#    docker rmi -f $IMAGES
-# else
-#     echo "No images found"
-# fi
+IMAGES=$(docker images -aq)
+if [ -n "$IMAGES" ]; then
+   docker rmi -f $IMAGES
+else
+    echo "No images found"
+fi
 
 echo "======================================"
 echo "Cleaning Kubernetes namespace"
