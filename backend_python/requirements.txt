@@ -1,5 +1,6 @@
 openai
 python-dotenv
+poetry
 fastapi[standard]
 uvicorn[standard]
 python-multipart

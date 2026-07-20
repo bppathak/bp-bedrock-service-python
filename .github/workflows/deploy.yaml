@@ -1,0 +1,33 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - run: |
+          docker build -t bp-bedrock-hub/backend-python:${{ github.sha }} .
+          docker push bp-bedrock-hub/backend-python:${{ github.sha }}
+          docker build -t bp-bedrock-hub/frontend-react:${{ github.sha }} ./frontend_react
+          docker push bp-bedrock-hub/frontend-react:${{ github.sha }}
+
+      - uses: azure/setup-kubectl@v4
+
+      - run: |
+          kubectl set image deployment/fastapi \
+            fastapi=bp-bedrock-hub/backend-python:${{ github.sha }} \
+            --namespace=bp-bedrock-service

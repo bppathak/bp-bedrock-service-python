@@ -11,7 +11,17 @@ MVP for a sequential submission journey that stores submission data, uploads PDF
 
 ## Run Locally
 
-Start the application:
+Use Scripts
+    ./start-backend.sh
+    ./start-frontend.sh
+
+    if using docker
+        ./start-bedrock-docker.sh
+        ./stop-bedrock-docker.sh
+
+    For kubernetes deployment, look at ./documents/Readme-kubernetes.sh
+
+Alternatively, we can also Start the application:
 
 ```bash
 docker compose up --build
