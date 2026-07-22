@@ -43,6 +43,10 @@ services:
       - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
       - LOCAL_DATA_DIR=/tmp/bp-bedrock-service
       - LOCAL_FILE_DIR=/tmp/bp-bedrock-service/files
+      - no_proxy=localhost,127.0.0.1.......,localstack
+      - NO_PROXY=localhost,127.0.0.1.......,localstack
+      - HTTP_PROXY=http://1.2.3.4:8080
+      - HTTPS_PROXY=http://4.3.2.1:8080
     depends_on:
       - localstack
 
