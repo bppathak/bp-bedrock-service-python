@@ -5,6 +5,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import auth, events, forms, health, queue, submissions
 
+import logging
+import sys
+
+logging.basicConfig(
+    level=logging.DEBUG, #Set to DEBUG to see debug messages
+    format='%(asctime)s-%(levelname)s-%(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)     # Output to console
+    ]
+)
 
 def create_app() -> FastAPI:
     app = FastAPI(

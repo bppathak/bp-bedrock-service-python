@@ -10,13 +10,31 @@
 #     the file is tracked.
 #     If it returns nothing, Git is not tracking it.
 
-# Removing the tracked files from Git's index
-# git rm -r --cached backend_python/app/__pycache__
-# git rm -r --cached backend_python/app/services/__pycache__
-# git rm --cached k8s/.DS_Store
+!/bin/bash
 
-# For many cached files throughout the project, you can remove them all at once:
-find . -name "__pycache__" -type d -exec git rm -r --cached {} +
-find . -name "*.pyc" -exec git rm --cached {} +
-find . -name ".DS_Store" -exec git rm --cached {} +
+set -e
 
+echo "Cleaning project..."
+
+find . -type d -name "__init__.*" | while read -r dir; do
+    git rm -r --cached "$dir" 2>/dev/null || true
+    rm -rf "$dir"
+done
+
+find . -type d -name "__pycache__" | while read -r dir; do
+    git rm -r --cached "$dir" 2>/dev/null || true
+    rm -rf "$dir"
+done
+
+find . -type f -name "*.pyc" | while read -r file; do
+    git rm --cached "$file" 2>/dev/null || true
+    rm -f "$file"
+done
+
+find . -type f -name ".DS_Store" | while read -r file; do
+    git rm --cached "$file" 2>/dev/null || true
+    rm -f "$file"
+done
+
+echo "Cleanup complete."
+git status
